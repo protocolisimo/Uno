@@ -2,7 +2,7 @@ import { Button, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native'
-import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler'
+import { FlatList } from 'react-native-gesture-handler'
 
 type ColorType = 'green' | 'yellow' | 'red' | 'blue' | 'wild'
 type CardType = { color: ColorType, type: string }
@@ -119,8 +119,6 @@ const RootLayout = () => {
   const drawCard = (playerIndex: number) => {
     const newPlayers = [...players];
     const player = newPlayers[playerIndex]
-
-    console.log({ newPlayers, player, playerIndex });
 
 
     setDeck((prevDeck) => {
