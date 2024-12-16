@@ -2,7 +2,7 @@ import { Button, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
+import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler'
 
 type ColorType = 'green' | 'yellow' | 'red' | 'blue' | 'wild'
 type CardType = { color: ColorType, type: string }
@@ -120,8 +120,8 @@ const RootLayout = () => {
     const newPlayers = [...players];
     const player = newPlayers[playerIndex]
 
-    console.log({newPlayers, player, playerIndex});
-    
+    console.log({ newPlayers, player, playerIndex });
+
 
     setDeck((prevDeck) => {
       if (prevDeck && prevDeck.length > 0) {
@@ -141,7 +141,7 @@ const RootLayout = () => {
 
   const playAiMove = (player: PlayerType) => {
     const avaibleCard = player.hand.findIndex(card => isPlayable(card));
-    
+
 
     if (avaibleCard !== -1) {
       handleMove(avaibleCard)
@@ -161,7 +161,7 @@ const RootLayout = () => {
     } else if (card.type === 'draw_2') {
       setCurrentPlayer((prev) => {
         const nextPlayer = (prev + gameDirection + players.length) % players.length;
-        
+
         for (let i = 0; i < 2; i++) {
           drawCard(nextPlayer)
         }
@@ -229,15 +229,15 @@ const RootLayout = () => {
   return (
     <View style={styles.container}>
       <View className='playersRow'>
-        <FlatList data={players} renderItem={({ item: player }) => (
+        {players.map(player => (
           <TouchableOpacity onPress={() => setThePlayer(player)} style={{ borderRadius: '50%', backgroundColor: `${player.id === players[currentPlayer].id ? 'green' : 'yellow'}` }} className='otherPlayer'>
             <Text>
               {`${player.id[0]}${player.id[1]}`}
             </Text>
           </TouchableOpacity>
-        )} />
+        ))}
       </View>
-      <FlatList contentContainerStyle={{ position: "relative", height: 200, width: 150, marginTop: 50 }} data={discardedPile} renderItem={({ item: card, index }) => (
+      {discardedPile.map((card, index) => (
         <View
           key={index}
           style={{
@@ -255,13 +255,13 @@ const RootLayout = () => {
             {discardedPile[discardedPile.length - 1].type}
           </Text>
         </View>
-      )} />
+      ))}
       <View style={{ flexDirection: 'row' }}>
-        {thePlayer && thePlayer.hand.map(({ type, color }, index) => (
+        {thePlayer?.hand.map(({ color, type }, index) => (
           <TouchableOpacity
             key={`${index}-${type}-${color}`}
             onPress={() => {
-              if (thePlayer.id === players[currentPlayer].id) {
+              if (thePlayer?.id === players[currentPlayer].id) {
                 handleMove(index)
               }
             }}
@@ -276,8 +276,8 @@ const RootLayout = () => {
           </TouchableOpacity>
         ))}
       </View>
-      {players.filter(player => player.id !== thePlayer?.id).map((player) => (
-        <View style={{backgroundColor: `${player.id === players[currentPlayer].id ? '#c7f2c7' : 'transparent'}`}}>
+      {players.filter(player => player.id !== thePlayer?.id).map(player => (
+        <View style={{ backgroundColor: `${player.id === players[currentPlayer].id ? '#c7f2c7' : 'transparent'}` }}>
           <Text>--------------{gameDirection === 1 ? '⬇️' : '⬆️'}</Text>
           <View style={{ flexDirection: 'row' }}>
             {player.hand.map(({ type, color }, index) => (
