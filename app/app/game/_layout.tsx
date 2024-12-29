@@ -6,8 +6,9 @@ const RootLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="game" options={{ headerShown: false }} />
+      <Stack.Screen name="waiting_screen" options={{ headerShown: true }} default />
     </Stack>
-  )
+  ) 
 }
 
 export default RootLayout

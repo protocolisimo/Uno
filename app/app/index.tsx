@@ -3,7 +3,7 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 
-const RootLayout = () => {
+const IndexLayout = ({navigation}) => {
   return (
     <SafeAreaView>
       <View>
@@ -17,13 +17,13 @@ const RootLayout = () => {
         <Text >
           Uno is  a Card game you play with friends in person.
         </Text>
-        <Button title='Get Started' onPress={() => router.push('/game')} />
+        <Button title='Get Started' onPress={() => navigation.navigate('waiting_screen')} />
       </View>
 
     </SafeAreaView>
   )
 }
 
-export default RootLayout
+export default IndexLayout
 
 const styles = StyleSheet.create({})
