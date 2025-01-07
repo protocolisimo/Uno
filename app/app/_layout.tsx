@@ -1,24 +1,97 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import Game from './game/game'
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import IndexLayout from './index'
-import Waiting_screen from './game/waiting_screen';
-
-
-
+import WaitingScreen from './game/waiting_screen';
+import { io } from 'socket.io-client';
 
 
 const RootLayout = () => {
   const Stack = createNativeStackNavigator();
 
+  const [gameState, setGameState] = useState({
+    players: [],
+    deck: [],
+    discardedPile: [],
+    currentPlayer: 0,
+    gameDirection: 1,
+  });
+
+  const [id, setId] = useState<string | undefined>();
+  const socket = io('http://localhost:3500');
+
+  useEffect(() => {
+    socket.on('gameState', (state) => {
+      setGameState(state);
+    });
+
+    socket.emit('getGame', (state) => {
+      setGameState(state);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.log('Connection error:', err.message);
+    });
+
+    return () => {
+      socket.off('gameState');
+    };
+  }, []);
+
+  console.log({gameState});
+
+
+
   return (
-  <Stack.Navigator>
-    <Stack.Screen name="index" options={{ headerShown: false }} component={IndexLayout} />
-    <Stack.Screen name="game" options={{ headerShown: false }} component={Game} />
-    <Stack.Screen name="waiting_screen" options={{ headerShown: false }} component={Waiting_screen} />
-  </Stack.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen name="index" options={{ headerShown: false }} component={IndexLayout} />
+      <Stack.Screen
+        name="game"
+        options={{ headerShown: false }}
+        component={() => (
+          <Game
+            onLeave={() => {
+              socket.disconnect();
+              setId(undefined)
+              setGameState({
+                players: [],
+                deck: [],
+                discardedPile: [],
+                currentPlayer: 0,
+                gameDirection: 1,
+              })
+            }}
+            gameState={gameState}
+            id={id}
+            handleDrawCard={() => {
+              socket.emit('drawCard', gameState.players[gameState.currentPlayer].id)
+            }}
+            handlePlayCard={(cardIndex: number) => {
+              socket.emit('playCard', {
+                playerId: gameState.players[gameState.currentPlayer].id,
+                cardIndex,
+              });
+            }}
+          />
+        )}
+      />
+      <Stack.Screen
+        name="waiting_screen"
+        options={{ headerShown: false }}
+        component={({ navigation }) => (
+          <WaitingScreen
+            clickHandler={() => {
+              socket.emit('joinGame', socket.id)
+              setId(socket.id)
+              navigation.navigate('game')
+            }}
+            players={gameState.players}
+          />
+        )}
+      />
+    </Stack.Navigator>
   )
 }
 

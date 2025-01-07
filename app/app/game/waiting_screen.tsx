@@ -1,21 +1,31 @@
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, Button, StyleSheet, SafeAreaView, FlatList, Text } from 'react-native';
 
-function WaitingScreen () {
+function WaitingScreen({ players, clickHandler }) {
+
+  console.log({ players });
+
+
   return (
-    <View style={styles.container}>
-      
+    <SafeAreaView style={styles.container}>
+      <View>
+        <FlatList data={players} renderItem={({item}) => (
+          <View>
+            <Text >
+              {item.id}
+            </Text>
+          </View>
+        )} />
+      </View>
 
-      <Button title="Waiting_screen"/>
+      <Button title="Waiting_screen" onPress={clickHandler} />
 
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default WaitingScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: {},
 });

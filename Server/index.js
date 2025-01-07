@@ -85,8 +85,12 @@ const playCardEffect = (card, playerId) => {
 const players = []
 
 io.on('connection', (socket) => {
-    console.log({socket})
+    socket.on('getGame', () => {
+        io.emit('gameState', gameState);
+    })
+
     socket.on('joinGame', (playerId) => {
+
         if (!players.some(player => player.id === playerId)) {
             const player = {
                 id: socket.id,
@@ -98,12 +102,10 @@ io.on('connection', (socket) => {
         io.emit('gameState', gameState);
     });
 
-    socket.on('playCard', ({ cardIndex }) => {
+    socket.on('playCard', ({ cardIndex, playerId }) => {
         const currentPlayer = gameState.players[gameState.currentPlayer];
 
-        console.log({currentPlayer})
-
-        if (socket.id !== currentPlayer.id) {
+        if (playerId !== currentPlayer.id) {
             console.log('Not your turn!');
             return;
         }
@@ -116,10 +118,10 @@ io.on('connection', (socket) => {
         io.emit('gameState', gameState);
     });
 
-    socket.on('drawCard', () => {
+    socket.on('drawCard', (playerId) => {
         const currentPlayer = gameState.players[gameState.currentPlayer];
 
-        if (socket.id !== currentPlayer.id) {
+        if (playerId !== currentPlayer.id) {
             console.log('Not your turn!');
             return;
         }
