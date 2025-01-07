@@ -2,10 +2,6 @@ import React from 'react';
 import { View, Button, StyleSheet, SafeAreaView, FlatList, Text } from 'react-native';
 
 function WaitingScreen({ players, clickHandler }) {
-
-  console.log({ players });
-
-
   return (
     <SafeAreaView style={styles.container}>
       <View>

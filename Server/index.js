@@ -2,6 +2,28 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 
 
+
+const server = createServer((req, res) => {
+    // Check the request URL and method for the health check route
+    if (req.url === '/health' && req.method === 'GET') {
+      // Set the response status code to 200 (OK)
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      
+      // Send a JSON response indicating the server is healthy
+      res.end(JSON.stringify({ status: 'OK', message: 'Server is healthy' }));
+    } else {
+      // For any other route, respond with 404
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+    }
+  });
+  
+  // Set the server to listen on port 3000
+  server.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+  });
+
+
 const httpServer = new createServer()
 
 const io = new Server(httpServer, {
