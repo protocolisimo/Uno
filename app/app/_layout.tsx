@@ -20,7 +20,7 @@ const RootLayout = () => {
   });
 
   const [id, setId] = useState<string | undefined>();
-  const socket = io('http://localhost:3500');
+  const socket = io('https://uno-server-cat3.onrender.com:3500');
 
   useEffect(() => {
     socket.on('gameState', (state) => {
