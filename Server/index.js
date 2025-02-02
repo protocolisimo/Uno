@@ -22,12 +22,6 @@ const io = new Server(httpServer, {
 const COLORS = ['green', 'yellow', 'red', 'blue'];
 const SPECIAL_CARDS = ['skip', 'draw_2', 'reverse'];
 const WILD_CARDS = ['wild', 'draw_4'];
-
-app.get('/checkLife', (req, res) => {
-    res.json({ status: 'alive' });
-});
-
-httpServer.on('request', app);
 // todo: fix not your turn logick
 // todo: maybe redo with OOP? 
 // todo: "loby" logick
