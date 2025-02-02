@@ -1,29 +1,95 @@
-import { StyleSheet, View, Image, Text, Button } from 'react-native'
+import { StyleSheet, View, Image, Text, ImageBackground, SafeAreaView } from 'react-native'
+import { Button } from '../components/Button'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
+import BgImage from '../assets/images/BG.png';
+import unoIcon from '../assets/images/unoIcon.png'
+import { typography } from '@/constants/Typography';
+import { COLORS } from '@/constants/Colors';
 
-const IndexLayout = ({navigation}) => {
+
+// todo: fix safe area view
+const IndexLayout = ({ navigation }) => {
   return (
-    <SafeAreaView>
-      <View>
-        <Image />
-        <Text >
-          Welcome to
-          <Text>
-            UNO Friend
-          </Text>
-        </Text>
-        <Text >
-          Uno is  a Card game you play with friends in person.
-        </Text>
-        <Button title='Get Started' onPress={() => navigation.navigate('waiting_screen')} />
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ImageBackground
+        source={BgImage}
+        style={styles.background}
+        resizeMode='cover'
+      >
+        <View style={styles.contentWrapper}>
+          <View style={styles.iconWrapper}>
+            <Image source={unoIcon} style={styles.icon} />
+          </View>
+          <View style={styles.titleWrapper}>
+            <Text style={styles.title}>
+              Welcome to
+            </Text>
+            <Text style={styles.secondTitle}>
+                UNO Friend
+              </Text>
+            <Text style={styles.subtitle}>
+              Uno is  a Card game you play with friends in person.
+            </Text>
+          </View>
+          <View style={styles.buttonWrapper}>
 
+          <Button text="Get Started" onPress={() => navigation.navigate('waiting_screen')} />
+
+          </View>
+          
+        </View>
+
+        
+      </ImageBackground>
     </SafeAreaView>
   )
 }
 
-export default IndexLayout
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  background: {
+    flex: 1,
+  },
 
-const styles = StyleSheet.create({})
+  contentWrapper: {
+    gap: 27,
+    flexGrow: 1,
+    paddingLeft: 47,
+    paddingRight: 47,
+    paddingTop: 137,
+    paddingBottom: 109,
+  },
+
+  titleWrapper: {
+    gap: 23,
+    flexGrow: 1,
+  },
+  title: typography.HELVETICA.H,
+  secondTitle: { ...typography.HELVETICA.H, color: COLORS.primary },
+  subtitle: typography.HELVETICA.Text2,
+
+  buttonWrapper: {
+    width: 200,
+    marginHorizontal: 'auto'
+  },
+
+  iconWrapper: {
+    width: 85,
+    height: 85,
+    marginBottom: 27,
+    display: "flex",
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 17,
+    backgroundColor: "#121030",
+  },
+  icon: {
+    width: 49,
+    height: 43
+  }
+});
+
+export default IndexLayout

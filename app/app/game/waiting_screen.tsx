@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Button, StyleSheet, SafeAreaView, FlatList, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, FlatList, Text } from 'react-native';
+import { Button } from '../../components/Button'
 
 function WaitingScreen({ players, clickHandler }) {
   return (
@@ -14,7 +15,7 @@ function WaitingScreen({ players, clickHandler }) {
         )} />
       </View>
 
-      <Button title="Waiting_screen" onPress={clickHandler} />
+      <Button text="Waiting_screen" onPress={clickHandler} />
 
     </SafeAreaView>
   );
