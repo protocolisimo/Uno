@@ -264,7 +264,12 @@ const RootLayout = () => {
   });
 
   const [id, setId] = useState<string | undefined>();
-  const socket = io('54.191.253.12:3000');
+
+
+  const socket = io('44.226.122.3:3500');
+
+
+  
 
   useEffect(() => {
     if (!socket) {

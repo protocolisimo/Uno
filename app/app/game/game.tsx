@@ -16,7 +16,7 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
 
   const thePlayer = players.find((player) => player.id === id)
 
-  console.log(thePlayer, players[0].hand, id);
+  // console.log(thePlayer, players[0].hand, id);
   
 
   return (
