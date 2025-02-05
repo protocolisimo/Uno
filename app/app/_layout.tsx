@@ -267,8 +267,6 @@ const RootLayout = () => {
 
 
   const socket = io('44.226.122.3:3500');
-
-
   
 
   useEffect(() => {

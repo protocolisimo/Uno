@@ -14,7 +14,7 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: '*',
+        origin: ['http://localhost:3000'],
         methods: ['GET', 'POST'],
     },
     transports: ['websocket', 'polling'] // Add 'polling' as a fallback
