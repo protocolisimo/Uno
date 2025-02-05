@@ -266,8 +266,8 @@ const RootLayout = () => {
   const [id, setId] = useState<string | undefined>();
 
 
-  const socket = io('44.226.122.3:3500');
-  
+  const socket = io('https://uno-server-cat3.onrender.com');
+
 
   useEffect(() => {
     if (!socket) {
