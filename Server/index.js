@@ -16,8 +16,10 @@ const io = new Server(httpServer, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
-    }
+    },
+    transports: ['websocket', 'polling'] // Add 'polling' as a fallback
 });
+
 
 const COLORS = ['green', 'yellow', 'red', 'blue'];
 const SPECIAL_CARDS = ['skip', 'draw_2', 'reverse'];
@@ -30,6 +32,10 @@ const WILD_CARDS = ['wild', 'draw_4'];
     // finishing the game and returning to lobby
     // route to return players in the lobby before connecting to socket
 // todo: normal CORS
+
+
+
+// try to use WEBRT
 
 
 
