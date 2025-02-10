@@ -291,6 +291,9 @@ const RootLayout = () => {
     };
   }, []);
 
+  console.log({gameState});
+  
+
 
   return (
     <Stack.Navigator>

@@ -66,7 +66,14 @@ class Game {
     }
 
     nextTurn() {
-        this.currentPlayer = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
+        if (this.players.length === 0) return;
+        
+        let newIndex = this.currentPlayer;
+        do {
+            newIndex = (newIndex + this.gameDirection + this.players.length) % this.players.length;
+        } while (!this.players[newIndex]); // Ensures we never select a removed player
+        
+        this.currentPlayer = newIndex;
     }
 
     drawCard(playerId) {
@@ -101,14 +108,14 @@ class Game {
 
     applyCardEffect(card) {
         if (card.type === 'skip') {
-            this.nextTurn();
+            this.nextTurn(); // Skip next player
         } else if (card.type === 'draw_2') {
-            const nextPlayer = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
-            for (let i = 0; i < 2; i++) this.drawCard(this.players[nextPlayer].id);
+            const nextPlayerIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
+            for (let i = 0; i < 2; i++) this.drawCard(this.players[nextPlayerIndex].id);
             this.nextTurn();
         } else if (card.type === 'draw_4') {
-            const nextPlayer = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
-            for (let i = 0; i < 4; i++) this.drawCard(this.players[nextPlayer].id);
+            const nextPlayerIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
+            for (let i = 0; i < 4; i++) this.drawCard(this.players[nextPlayerIndex].id);
             this.nextTurn();
         } else if (card.type === 'reverse') {
             this.gameDirection *= -1;
@@ -161,6 +168,11 @@ io.on('connection', (socket) => {
         // If all players leave, reset the game
         if (gameState.players.length === 0) {
             Object.assign(gameState, new Game());
+        } else {
+            // If current player leaves, move to next valid player
+            if (!gameState.players.find(player => player.id === gameState.players[gameState.currentPlayer]?.id)) {
+                gameState.nextTurn();
+            }
         }
 
         io.emit('gameState', gameState);
