@@ -15,7 +15,7 @@ const httpServer = createServer((req, res) => {
 // Secure CORS Configuration
 const io = new Server(httpServer, {
     cors: {
-        origin: ['http://your-client-url.com'], // Replace with actual client URL
+        origin: ['*', 'http://localhost:8081'], // Replace with actual client URL
         methods: ['GET', 'POST'],
     }
 });
