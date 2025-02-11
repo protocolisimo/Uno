@@ -50,9 +50,7 @@ class Game {
             });
         }
 
-        return deck.map(card => ({ ...card, sort: Math.random() }))
-            .sort((a, b) => a.sort - b.sort)
-            .map(({ color, type }) => ({ color, type }));
+        return deck.sort(() => Math.random() - 0.5);
     }
 
     addPlayer(playerId) {
@@ -66,13 +64,14 @@ class Game {
     }
 
     nextTurn() {
-        if (this.players.length === 0) return;
+        if (this.players.length < 2) return; // Prevents endless loop if only one player
+
+        let newIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
         
-        let newIndex = this.currentPlayer;
-        do {
+        while (!this.players[newIndex] || this.players[newIndex].disconnected) {
             newIndex = (newIndex + this.gameDirection + this.players.length) % this.players.length;
-        } while (!this.players[newIndex]); // Ensures we never select a removed player
-        
+        }
+
         this.currentPlayer = newIndex;
     }
 
@@ -80,11 +79,10 @@ class Game {
         if (this.deck.length === 0) this.refillDeck();
         if (this.deck.length === 0) return; // If still empty after trying to refill
 
-        const playerIndex = this.players.findIndex(player => player.id === playerId);
-        if (playerIndex === -1) return;
+        const player = this.players.find(player => player.id === playerId);
+        if (!player) return;
 
-        const card = this.deck.pop();
-        this.players[playerIndex].hand.push(card);
+        player.hand.push(this.deck.pop());
     }
 
     refillDeck() {
@@ -99,7 +97,15 @@ class Game {
         const currentPlayer = this.players[this.currentPlayer];
         if (!currentPlayer || currentPlayer.id !== playerId) return false;
 
-        const card = currentPlayer.hand.splice(cardIndex, 1)[0];
+        const card = currentPlayer.hand[cardIndex];
+        const topCard = this.discardedPile[this.discardedPile.length - 1];
+
+        // Validate the move
+        if (topCard && card.color !== 'wild' && card.color !== topCard.color && card.type !== topCard.type) {
+            return false; // Invalid move
+        }
+
+        currentPlayer.hand.splice(cardIndex, 1);
         this.discardedPile.push(card);
         this.applyCardEffect(card);
         this.nextTurn();
@@ -108,14 +114,14 @@ class Game {
 
     applyCardEffect(card) {
         if (card.type === 'skip') {
-            this.nextTurn(); // Skip next player
+            this.nextTurn();
         } else if (card.type === 'draw_2') {
-            const nextPlayerIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
-            for (let i = 0; i < 2; i++) this.drawCard(this.players[nextPlayerIndex].id);
+            const nextPlayer = this.players[(this.currentPlayer + this.gameDirection + this.players.length) % this.players.length];
+            for (let i = 0; i < 2; i++) this.drawCard(nextPlayer.id);
             this.nextTurn();
         } else if (card.type === 'draw_4') {
-            const nextPlayerIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
-            for (let i = 0; i < 4; i++) this.drawCard(this.players[nextPlayerIndex].id);
+            const nextPlayer = this.players[(this.currentPlayer + this.gameDirection + this.players.length) % this.players.length];
+            for (let i = 0; i < 4; i++) this.drawCard(nextPlayer.id);
             this.nextTurn();
         } else if (card.type === 'reverse') {
             this.gameDirection *= -1;
@@ -142,34 +148,33 @@ io.on('connection', (socket) => {
         io.emit('gameState', gameState);
     });
 
-    socket.on('playCard', ({ cardIndex, playerId }) => {
+    socket.on('playCard', ({ cardIndex, playerId }, callback) => {
         if (!gameState.playCard(playerId, cardIndex)) {
-            socket.emit('error', { message: 'Not your turn!' });
+            callback({ success: false, message: 'Invalid move!' });
             return;
         }
         io.emit('gameState', gameState);
+        callback({ success: true });
     });
 
-    socket.on('drawCard', (playerId) => {
+    socket.on('drawCard', (playerId, callback) => {
         if (gameState.players[gameState.currentPlayer]?.id !== playerId) {
-            socket.emit('error', { message: 'Not your turn!' });
+            callback({ success: false, message: 'Not your turn!' });
             return;
         }
         gameState.drawCard(playerId);
         gameState.nextTurn();
         io.emit('gameState', gameState);
+        callback({ success: true });
     });
 
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);
-
         gameState.players = gameState.players.filter(player => player.id !== socket.id);
 
-        // If all players leave, reset the game
         if (gameState.players.length === 0) {
             Object.assign(gameState, new Game());
         } else {
-            // If current player leaves, move to next valid player
             if (!gameState.players.find(player => player.id === gameState.players[gameState.currentPlayer]?.id)) {
                 gameState.nextTurn();
             }

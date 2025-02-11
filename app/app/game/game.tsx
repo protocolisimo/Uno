@@ -1,8 +1,10 @@
 import { BLACK, OTHER_COLORS, WHITE } from '@/constants/Colors';
 import { typography } from '@/constants/Typography';
 import React from 'react';
-import { View, Button, Text, TouchableOpacity, StyleSheet, SafeAreaView, Image } from 'react-native';
-import deckImage from '../../assets/images/deck.png';
+import { View, Text, StyleSheet, SafeAreaView, Image } from 'react-native';
+import deckImage from '@/assets/images/deck.png';
+import Card from '@/components/Card';
+import { Button } from '@/components/Button';
 
 function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, handleDrawCard, handlePlayCard }) {
 
@@ -16,10 +18,6 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
 
   const thePlayer = players.find((player) => player.id === id)
 
-  // console.log({id, currentPlayer: players[currentPlayer]}, currentPlayer);
-  
-  
-
   return (
     <SafeAreaView>
       <View style={styles.topBarWrapper}>
@@ -27,7 +25,6 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
           {players.map((player) => (
             <View >
               <View style={styles.avatarWrapper}>
-
                 <Text style={styles.avatar}>
                   {player.id[0]}{player.id[1]}
                 </Text>
@@ -52,24 +49,17 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
           {players[currentPlayer]?.id === id ? 'Your turn' : players[currentPlayer]?.id}
         </Text>
       </View>
-      <View>
+      <View style={styles.pile}>
         {discardedPile.map(((card) => (
-          <Text>
-            {card.color}
-            {card.type.toString()}
-          </Text>
+          <View style={styles.pileCardWrapper}>
+            <Card card={card} onPress={() => playCard(index)} />
+          </View>
         )))}
       </View>
-      <View>
+      <View style={styles.hand}>
         {thePlayer?.hand.map(((card, index) => (
-          <TouchableOpacity onPress={() => playCard(index)}>
-            <Text>
-              {card.color}
-              {card.type.toString()}
-            </Text>
-          </TouchableOpacity>
+          <Card card={card} onPress={() => playCard(index)} />
         )))}
-
       </View>
       <View>
         {/* // controls */}
@@ -80,7 +70,7 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
           {/* // you */}
         </View>
         <View>
-          {/* // dont have it button */}
+          <Button text="Draw" onPress={drawCard} />
         </View>
       </View>
     </SafeAreaView>
@@ -88,7 +78,6 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
 };
 
 export default Game;
-
 const styles = StyleSheet.create({
   topBarWrapper: {
     width: '100%',
@@ -135,5 +124,21 @@ const styles = StyleSheet.create({
   deckImage: {
     width: 47,
     height: 64
+  },
+
+  pile: {
+    height: 200,
+    width: '100%',
+    position: 'relative',
+    alignItems: 'center',
+  },
+  pileCardWrapper: {
+    position: 'absolute',
+    transform: 'scale(1.3)',
+  },
+  hand: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    gap: 10,
   }
-});
+})
