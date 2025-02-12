@@ -18,6 +18,9 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
 
   const thePlayer = players.find((player) => player.id === id)
 
+  console.log({currentPlayer: players[currentPlayer]?.id, thePlayer: thePlayer?.id});
+  
+
   return (
     <SafeAreaView>
       <View style={styles.topBarWrapper}>
@@ -125,7 +128,6 @@ const styles = StyleSheet.create({
     width: 47,
     height: 64
   },
-
   pile: {
     height: 200,
     width: '100%',

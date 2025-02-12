@@ -37,7 +37,8 @@ const RootLayout = () => {
   const [id, setId] = useState<string | undefined>();
 
 
-  const socket = io('https://uno-server-cat3.onrender.com');
+  // const socket = io('https://uno-server-cat3.onrender.com');
+  const socket = io('http://localhost:3500');
 
 
   useEffect(() => {
@@ -60,10 +61,6 @@ const RootLayout = () => {
     };
   }, []);
 
-  console.log({gameState});
-  
-
-
   return (
     <Stack.Navigator>
       <Stack.Screen name="index" options={{ headerShown: false }} component={IndexLayout} />
@@ -72,28 +69,33 @@ const RootLayout = () => {
         options={{ headerShown: false }}
         component={() => (
           <Game
-            onLeave={() => {
-              socket.disconnect();
-              setId(undefined)
-              setGameState({
-                players: [],
-                deck: [],
-                discardedPile: [],
-                currentPlayer: 0,
-                gameDirection: 1,
-              })
-            }}
+            // onLeave={() => {
+            //   socket.disconnect();
+            //   setId(undefined)
+            //   setGameState({
+            //     players: [],
+            //     deck: [],
+            //     discardedPile: [],
+            //     currentPlayer: 0,
+            //     gameDirection: 1,
+            //   })
+            // }}
             gameState={gameState}
             id={id}
             handleDrawCard={() => {
-              socket.emit('drawCard', gameState.players[gameState.currentPlayer].id)
+              socket.emit('drawCard', id)
             }}
-            handlePlayCard={(cardIndex: number) => {
+            handlePlayCard={(cardIndex) => {
               socket.emit('playCard', {
-                playerId: gameState.players[gameState.currentPlayer].id,
-                cardIndex,
+                  playerId: id,
+                  cardIndex,
+              }, (response) => {
+                
+                  if (!response.success) {
+                      alert(response.message || 'Invalid move');
+                  }
               });
-            }}
+          }}
           />
         )}
       />
