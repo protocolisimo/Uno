@@ -25,6 +25,24 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Create an APK build
+
+To create an APK build for your project, follow these steps:
+
+1. Install the Expo CLI if you haven't already:
+
+   ```bash
+   npm install -g expo-cli
+   ```
+
+2. Build the APK:
+
+   ```bash
+   expo build:android -t apk
+   ```
+
+3. Follow the instructions in the terminal to complete the build process. Once the build is complete, you can download the APK from the provided URL.
+
 ## Get a fresh project
 
 When you're ready, run:

@@ -65,6 +65,7 @@ class Game {
 
     nextTurn() {
         if (this.players.length < 2) return; // Prevents endless loop if only one player
+        
 
         let newIndex = (this.currentPlayer + this.gameDirection + this.players.length) % this.players.length;
         
@@ -95,33 +96,38 @@ class Game {
 
     playCard(playerId, cardIndex) {
         const currentPlayer = this.players[this.currentPlayer];
+        console.log('we have a current player', currentPlayer);
         if (!currentPlayer || currentPlayer.id !== playerId) return false;
 
         const card = currentPlayer.hand[cardIndex];
         const topCard = this.discardedPile[this.discardedPile.length - 1];
 
         // Validate the move
-        if (topCard && card.color !== 'wild' && card.color !== topCard.color && card.type !== topCard.type) {
+        if (topCard && topCard.color !== 'wild' && card.color !== 'wild' && card.color !== topCard.color && card.type !== topCard.type) {
+
             return false; // Invalid move
         }
 
         currentPlayer.hand.splice(cardIndex, 1);
         this.discardedPile.push(card);
         this.applyCardEffect(card);
-        this.nextTurn();
+        // this.nextTurn();
         return true;
     }
 
     applyCardEffect(card) {
         if (card.type === 'skip') {
             this.nextTurn();
+            this.nextTurn();
         } else if (card.type === 'draw_2') {
             const nextPlayer = this.players[(this.currentPlayer + this.gameDirection + this.players.length) % this.players.length];
             for (let i = 0; i < 2; i++) this.drawCard(nextPlayer.id);
             this.nextTurn();
+            this.nextTurn();
         } else if (card.type === 'draw_4') {
             const nextPlayer = this.players[(this.currentPlayer + this.gameDirection + this.players.length) % this.players.length];
             for (let i = 0; i < 4; i++) this.drawCard(nextPlayer.id);
+            this.nextTurn();
             this.nextTurn();
         } else if (card.type === 'reverse') {
             this.gameDirection *= -1;
@@ -134,6 +140,7 @@ class Game {
 
 // Initialize Game State
 const gameState = new Game();
+
 
 // Socket.io Events
 io.on('connection', (socket) => {
@@ -150,22 +157,23 @@ io.on('connection', (socket) => {
 
     socket.on('playCard', ({ cardIndex, playerId }, callback) => {
         if (!gameState.playCard(playerId, cardIndex)) {
-            callback({ success: false, message: 'Invalid move!' });
+            // callback({ success: false, message: 'Invalid move!' });
             return;
         }
+        // gameState.nextTurn();
         io.emit('gameState', gameState);
-        callback({ success: true });
+        // callback({ success: true });
     });
 
     socket.on('drawCard', (playerId, callback) => {
         if (gameState.players[gameState.currentPlayer]?.id !== playerId) {
-            callback({ success: false, message: 'Not your turn!' });
+            // callback({ success: false, message: 'Not your turn!' });
             return;
         }
         gameState.drawCard(playerId);
         gameState.nextTurn();
         io.emit('gameState', gameState);
-        callback({ success: true });
+        // callback({ success: true });
     });
 
     socket.on('disconnect', () => {
