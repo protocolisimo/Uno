@@ -8,7 +8,7 @@ import { COLORS } from '@/constants/Colors';
 
 
 // todo: fix safe area view
-const IndexLayout = ({ navigation }) => {
+const IndexLayout = ({ onclick }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -33,7 +33,7 @@ const IndexLayout = ({ navigation }) => {
           </View>
           <View style={styles.buttonWrapper}>
 
-          <Button text="Get Started" onPress={() => navigation.navigate('waiting_screen')} />
+          <Button text="Get Started" onPress={onclick} />
 
           </View>
           
