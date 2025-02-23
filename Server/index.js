@@ -14,10 +14,6 @@ function readRequestBody(req, callback) {
     });
 }
 
-// Implement a create room event listener
-// Add event emmiter for new rooms, maybe it should be handled buy express on http routes
-//  
-
 const notFoundHandler = (res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
@@ -40,7 +36,8 @@ const corsHandler = (req, res) => {
     return false;
 }
 
-const httpServer = createServer((req, res) => {
+const httpServer = createServer(async (req, res) => {
+    await userDatabase.connect()
     if (corsHandler(req, res)) return;
 
     switch (req.method) {
@@ -57,21 +54,17 @@ const httpServer = createServer((req, res) => {
         case 'POST':
             switch (req.url) {
                 case '/sigin':
-                    return readRequestBody(req, (body) => {
+                    return readRequestBody(req, async (body) => {
                         try {
                             const data = JSON.parse(body);
-
                             if (!data.userName) {
                                 return badBodyRequest(res);
                             }
                             
-                            let user = userDatabase.get(data.userName);
-
-
-                            console.log({user})
+                            let user = await userDatabase.get(data.userName);
 
                             if (!user) {
-                                user = userDatabase.insert(data.userName);
+                                user = await userDatabase.insert(data.userName);
                             }
 
                             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -173,22 +166,17 @@ class Game {
 
     playCard(playerId, cardIndex) {
         const currentPlayer = this.players[this.currentPlayer];
-        // console.log('we have a current player', currentPlayer);
         if (!currentPlayer || currentPlayer.id !== playerId) return false;
 
         const card = currentPlayer.hand[cardIndex];
         const topCard = this.discardedPile[this.discardedPile.length - 1];
-
-        // Validate the move
         if (topCard && topCard.color !== 'wild' && card.color !== 'wild' && card.color !== topCard.color && card.type !== topCard.type) {
-
-            return false; // Invalid move
+            return false;
         }
 
         currentPlayer.hand.splice(cardIndex, 1);
         this.discardedPile.push(card);
         this.applyCardEffect(card);
-        // this.nextTurn();
         return true;
     }
 
@@ -236,24 +224,22 @@ io.on('connection', (socket) => {
     socket.on('createRoom', (roomName, cb) => {
         console.log(socket.id, 'createRoom', roomName)
         const game = new Game()
+
         roomsList[roomName] = {roomName, gameState: game};
         const gameState = roomsList[roomName].gameState;
         gameState.addPlayer(socket.id);
-        socket.in(roomName).emit('gameState', gameState);
-        // io.emit('rooms', roomsList);
-        cb(roomName);
+        io.emit('rooms', roomsList);
     });
     
     socket.on('joinRoom', (roomName, cb) => {
         console.log(socket.id, 'joinRoom', roomName)
+        socket.join(roomName);
         
         const gameState = roomsList[roomName].gameState;
         gameState.addPlayer(socket.id);
-        console.log(gameState)
-        socket.join(roomName);
-        socket.to(roomName).emit('gameState', gameState);
-        io.emit('rooms', roomsList);
-        cb(roomName);
+        
+        io.in(roomName).emit('gameState', gameState);
+        cb();
     })
 
     socket.on('getRooms', (cb) => {
@@ -265,7 +251,6 @@ io.on('connection', (socket) => {
         const gameState = roomsList[roomName].gameState
 
         if (!gameState.playCard(playerId, cardIndex)) {
-            // callback({ success: false, message: 'Invalid move!' });
             return;
         }
         io.in(roomName).emit('gameState', gameState);
@@ -274,7 +259,6 @@ io.on('connection', (socket) => {
     socket.on('drawCard', ({playerId, roomName}) => {
         const gameState = roomsList[roomName].gameState;
         if (gameState.players[gameState.currentPlayer]?.id !== playerId) {
-            // callback({ success: false, message: 'Not your turn!' });
             return;
         }
         gameState.drawCard(playerId);
@@ -282,19 +266,22 @@ io.on('connection', (socket) => {
         io.to(roomName).emit('gameState', gameState);
     });
 
-    socket.on('disconnect', ({playerId, roomName}) => {
-        // const gameState = roomsList?.[roomName]?.gameState;
-        // gameState?.players = gameState?.players?.filter(player => player.id !== playerId);
+    socket.on('leave', ({playerId, roomName}) => {
+        const gameState = roomsList?.[roomName]?.gameState;
 
-        // if (gameState.players.length === 0) {
-        //     Object.assign(gameState, new Game());
-        // } else {
-        //     if (!gameState.players.find(player => player.id === gameState.players[gameState.currentPlayer]?.id)) {
-        //         gameState.nextTurn();
-        //     }
-        // }
+        console.log(gameState, roomName, playerId)
+        
+        if (gameState?.players.length === 0) {
+            delete roomsList?.[roomName]
+        } else {
+            if (playerId === gameState?.players[gameState.currentPlayer]?.id) {
+                const filterArr = gameState?.players?.filter(player => player.id !== playerId);
+                gameState.players = filterArr
+                gameState.nextTurn();
+            }
+        }
 
-        // io.to(roomName).emit('gameState', gameState);
+        io.in(roomName).emit('gameState', gameState);
     });
 });
 

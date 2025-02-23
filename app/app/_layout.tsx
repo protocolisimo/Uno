@@ -48,7 +48,6 @@ const RootLayout = () => {
     });
   }
 
-
   return (
     <Stack.Navigator>
       <Stack.Screen name="index" options={{ headerShown: false }} component={({ navigation }) => <IndexLayout onclick={() => {
@@ -60,8 +59,11 @@ const RootLayout = () => {
         options={{ headerShown: false }}
         component={() => (
           <Game
-            // onLeave={() => {
-            // }}
+            onLeave={() => {
+              console.log('onLeave');
+              // socket.current.emit('leave', { playerId: id, roomName })
+            
+            }}
             gameState={gameState}
             id={id}
             handleDrawCard={() => {
@@ -111,13 +113,7 @@ const RootLayout = () => {
 
               }}
               createHandler={(room) => {
-                console.log({ room });
-
-                socket.current.emit('createRoom', room, () => socket.current.emit('joinRoom', room, () => {
-                  setRoomName(room)
-                  navigation.navigate('game')
-                }));
-
+                socket.current.emit('createRoom', room);
               }}
               rooms={Object.keys(rooms)}
             />

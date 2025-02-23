@@ -1,13 +1,13 @@
 import { BLACK, OTHER_COLORS, WHITE } from '@/constants/Colors';
 import { typography } from '@/constants/Typography';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image } from 'react-native';
-import deckImage from '@/assets/images/deck.png';
+import deckImage from '../../assets/images/deck.png';
 import Card from '@/components/Card';
 import { Button } from '@/components/Button';
 import Player from '@/components/Player';
 
-function Game({ gameState, id, handleDrawCard, handlePlayCard }) {
+function Game({ gameState, id, handleDrawCard, handlePlayCard, onLeave }) {
 
   const { discardedPile, players, deck, currentPlayer } = gameState
 
@@ -18,19 +18,23 @@ function Game({ gameState, id, handleDrawCard, handlePlayCard }) {
   const drawCard = () => {
     handleDrawCard();
   };
-  
-  console.log({id, gameState});
-  
+
+  useEffect(() => {
+    console.log('Game component mounted');
+    return () => {
+      console.log('Game component unmounted, calling onLeave');
+      onLeave();
+    };
+  }, []);
+
   const thePlayer = players.find((player) => player.id === id);
 
-  
-  
   return (
     <SafeAreaView>
       <View style={styles.topBarWrapper}>
         <View style={styles.playersWrapper}>
           {players.map((player) => player.id !== thePlayer?.id && (
-            <Player stringUnderAvatar={player.hand.length.toString()} active={player.id ===  players?.[currentPlayer]?.id} />
+            <Player stringUnderAvatar={player.hand.length.toString()} active={player.id === players?.[currentPlayer]?.id} />
           ))}
         </View>
         <View>
@@ -51,11 +55,11 @@ function Game({ gameState, id, handleDrawCard, handlePlayCard }) {
             styles.pileCardWrapper,
             {
               transform: [
-                { rotate: `${(index % 5) * 5 - 10}deg` }, // Random small rotation
-                { translateX: (index % 3) * 4 - 6 }, // Small horizontal shift
-                { translateY: (index % 3) * 2 - 4 }  // Small vertical shift
+                { rotate: `${(index % 5) * 5 - 10}deg` },
+                { translateX: (index % 3) * 4 - 6 },
+                { translateY: (index % 3) * 2 - 4 }
               ],
-              zIndex: index, // Ensures newer cards are on top
+              zIndex: index,
             },
           ]}>
             <Card card={card} onPress={() => playCard(index)} />
@@ -73,11 +77,11 @@ function Game({ gameState, id, handleDrawCard, handlePlayCard }) {
         </View>
         <View>
           <Player stringUnderAvatar='You' active={id === players?.[currentPlayer]?.id} />
+        </View>
+        <View>
+          <Button text="Draw" onPress={drawCard} />
+        </View>
       </View>
-      <View>
-        <Button text="Draw" onPress={drawCard} />
-      </View>
-    </View>
     </SafeAreaView >
   );
 };
