@@ -1,12 +1,15 @@
 import { BLACK, OTHER_COLORS, WHITE } from '@/constants/Colors';
 import { typography } from '@/constants/Typography';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image } from 'react-native';
-import deckImage from '@/assets/images/deck.png';
+import deckImage from '../../assets/images/deck.png';
 import Card from '@/components/Card';
 import { Button } from '@/components/Button';
+import Player from '@/components/Player';
 
-function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, handleDrawCard, handlePlayCard }) {
+function Game({ gameState, id, handleDrawCard, handlePlayCard, onLeave }) {
+
+  const { discardedPile, players, deck, currentPlayer } = gameState
 
   const playCard = (cardIndex: number) => {
     handlePlayCard(cardIndex);
@@ -16,28 +19,22 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
     handleDrawCard();
   };
 
-  const thePlayer = players.find((player) => player.id === id)
+  useEffect(() => {
+    console.log('Game component mounted');
+    return () => {
+      console.log('Game component unmounted, calling onLeave');
+      onLeave();
+    };
+  }, []);
 
-  console.log({currentPlayer: players[currentPlayer]?.id, thePlayer: thePlayer?.id});
-  
+  const thePlayer = players.find((player) => player.id === id);
 
   return (
     <SafeAreaView>
       <View style={styles.topBarWrapper}>
         <View style={styles.playersWrapper}>
-          {players.map((player) => (
-            <View >
-              <View style={styles.avatarWrapper}>
-                <Text style={styles.avatar}>
-                  {player.id[0]}{player.id[1]}
-                </Text>
-              </View>
-              <View style={styles.handDisplayWrapper}>
-                <Text>
-                  {player.hand.length.toString()}
-                </Text>
-              </View>
-            </View>
+          {players.map((player) => player.id !== thePlayer?.id && (
+            <Player stringUnderAvatar={player.hand.length.toString()} active={player.id === players?.[currentPlayer]?.id} />
           ))}
         </View>
         <View>
@@ -49,12 +46,22 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
       </View>
       <View>
         <Text>
-          {players[currentPlayer]?.id === id ? 'Your turn' : players[currentPlayer]?.id}
+          {players[currentPlayer]?.id === id && 'Your turn'}
         </Text>
       </View>
       <View style={styles.pile}>
-        {discardedPile.map(((card) => (
-          <View style={styles.pileCardWrapper}>
+        {discardedPile.map(((card, index) => (
+          <View style={[
+            styles.pileCardWrapper,
+            {
+              transform: [
+                { rotate: `${(index % 5) * 5 - 10}deg` },
+                { translateX: (index % 3) * 4 - 6 },
+                { translateY: (index % 3) * 2 - 4 }
+              ],
+              zIndex: index,
+            },
+          ]}>
             <Card card={card} onPress={() => playCard(index)} />
           </View>
         )))}
@@ -65,18 +72,17 @@ function Game({ gameState: { discardedPile, players, deck, currentPlayer }, id, 
         )))}
       </View>
       <View>
-        {/* // controls */}
         <View>
           {/* // uno button */}
         </View>
         <View>
-          {/* // you */}
+          <Player stringUnderAvatar='You' active={id === players?.[currentPlayer]?.id} />
         </View>
         <View>
           <Button text="Draw" onPress={drawCard} />
         </View>
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
@@ -91,21 +97,6 @@ const styles = StyleSheet.create({
   playersWrapper: {
     flexDirection: "row",
     gap: 12,
-  },
-  avatarWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: '50%',
-    borderColor: OTHER_COLORS.brightGray,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: BLACK,
-    marginBottom: 11,
-  },
-  avatar: {
-    fontWeight: 'bold',
-    color: WHITE
   },
   handDisplayWrapper: {
     position: "absolute",

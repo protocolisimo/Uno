@@ -2,16 +2,15 @@ import cardImages from '@/constants/CardImages';
 import React from 'react';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-
-interface CardProps {
+type CardProps = {
     card: {
         color: string;
         type: string;
-    }
+    } // there will proper card type
     onPress?: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ card, onPress }) => {
+const Card = ({ card, onPress }: CardProps) => {
     const imageSource = cardImages[`${card.color}-${card.type}`] || cardImages["default"];
 
     return (
