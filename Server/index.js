@@ -228,7 +228,7 @@ io.on('connection', (socket) => {
         roomsList[roomName] = {roomName, gameState: game};
         const gameState = roomsList[roomName].gameState;
         gameState.addPlayer(socket.id);
-        io.emit('rooms', roomsList);
+        io.emit('rooms', roomsList); // a list with names will be just fine
     });
     
     socket.on('joinRoom', (roomName, cb) => {

@@ -1,47 +1,4 @@
 {
-  "expo": {
-    "name": "UNO_game",
-    "slug": "UNO_game",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "scheme": "UNO",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "permissions": [
-        "INTERNET"
-      ],
-      "package": "com.kotyrylo.UNO_game"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/unoIcon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "670162c8-2dbd-4f5e-934a-046bf0ee56fd"
-      }
-    }
-  }
+  "name": "App",
+  "displayName": "App"
 }
